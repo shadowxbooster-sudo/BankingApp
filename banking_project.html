@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Banking App — Frontend (Demo Capable)</title>
+<style>
+  body{font-family:Arial,Helvetica,sans-serif;background:#f3f6f9;color:#102a43;margin:0;padding:0}
+  header{background:#0b3d91;color:#fff;padding:18px}
+  .wrap{max-width:960px;margin:18px auto;padding:18px}
+  .card{background:#fff;border-radius:8px;padding:14px;margin-bottom:12px;box-shadow:0 2px 8px rgba(2,6,23,0.06)}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .col{flex:1}
+  label{display:block;font-size:13px;color:#334e68;margin-bottom:6px}
+  input,select{width:100%;padding:8px;border:1px solid #d9e2ec;border-radius:6px}
+  button{background:#0b3d91;color:#fff;padding:10px 12px;border:none;border-radius:6px;cursor:pointer}
+  .muted{color:#617d98;font-size:13px}
+  .actions{display:flex;gap:8px;flex-wrap:wrap}
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:8px;border-bottom:1px solid #eef3f8;text-align:left}
+  .small{font-size:13px;color:#617d98}
+  .tog{display:inline-flex;align-items:center;gap:8px}
+</style>
+</head>
+<body>
+<header><div style="max-width:960px;margin:0 auto">Banking App Demo — Frontend</div></header>
+<div class="wrap">
+  <div class="card">
+    <h3>Connection</h3>
+    <p class="muted small">If you have a backend deployed (public URL), set API Base to that URL (e.g. <code>https://your-server.example</code>). Otherwise use Demo Mode.</p>
+    <div class="row">
+      <div class="col">
+        <label>API Base (for backend)</label>
+        <input id="apiBaseInput" placeholder="http://localhost:8000 or https://your-backend.example">
+      </div>
+      <div style="flex:0 0 180px">
+        <label>&nbsp;</label>
+        <div style="display:flex;gap:8px">
+          <button id="saveApi">Save</button>
+          <div class="tog">
+            <input type="checkbox" id="demoMode" />
+            <label for="demoMode" class="small">Use Demo Mode</label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" id="authCard">
+    <h3>Register / Login</h3>
+    <div class="row">
+      <div class="col">
+        <label>Username</label><input id="username">
+      </div>
+      <div class="col">
+        <label>Password</label><input id="password" type="password">
+      </div>
+      <div class="col">
+        <label>Full name (register)</label><input id="fullname">
+      </div>
+    </div>
+    <div style="margin-top:10px" class="actions">
+      <button id="btnRegister">Register</button>
+      <button id="btnLogin">Login</button>
+      <span id="authMsg" class="small muted"></span>
+    </div>
+  </div>
+
+  <div class="card" id="dashboard" style="display:none">
+    <h3>Dashboard — <span id="userName"></span></h3>
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <h4>Accounts</h4>
+          <div id="accountsList" class="small muted">loading...</div>
+        </div>
+
+        <div class="card">
+          <h4>Savings</h4>
+          <label>Select Account No</label>
+          <select id="savingsSelect"></select>
+          <label>Amount</label><input id="savingsAmount" value="100">
+          <div style="margin-top:8px" class="actions">
+            <button id="depositBtn">Deposit</button>
+            <button id="withdrawBtn">Withdraw</button>
+            <span id="savingsMsg" class="small muted"></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Open FD</h4>
+          <label>Principal</label><input id="fdPrincipal" value="1000">
+          <label>Months</label><input id="fdMonths" value="12">
+          <label>Annual rate (%)</label><input id="fdRate" value="5">
+          <div style="margin-top:8px" class="actions">
+            <button id="openFdBtn">Open FD</button>
+            <span id="fdMsg" class="small muted"></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h4>Apply Loan</h4>
+          <label>Principal</label><input id="loanPrincipal" value="5000">
+          <label>Annual rate (%)</label><input id="loanRate" value="7.5">
+          <label>Months</label><input id="loanMonths" value="12">
+          <div style="margin-top:8px" class="actions">
+            <button id="applyLoanBtn">Apply Loan</button>
+            <span id="loanMsg" class="small muted"></span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="col" style="flex:0 0 360px">
+        <div class="card">
+          <h4>Cards</h4>
+          <label>Issue Type</label>
+          <select id="cardType"><option value="debit">Debit</option><option value="credit">Credit</option></select>
+          <label>Linked Savings Account (for Debit) / Limit (for Credit)</label>
+          <input id="cardParam" placeholder="AccountNo or limit">
+          <div style="margin-top:8px" class="actions">
+            <button id="issueCardBtn">Issue Card</button>
+            <span id="cardMsg" class="small muted"></span>
+          </div>
+
+          <hr>
+
+          <h4>Manage Card</h4>
+          <label>Card Account No</label>
+          <input id="cardAccountNo">
+          <label>Amount</label><input id="cardAmount" value="100">
+          <div style="margin-top:8px" class="actions">
+            <button id="cardChargeBtn">Charge</button>
+            <button id="cardPayBtn">Pay</button>
+            <button id="cardMinDueBtn">Min Due</button>
+            <span id="cardActionMsg" class="small muted"></span>
+          </div>
+          <div style="margin-top:10px" id="cardInfo" class="small muted"></div>
+        </div>
+
+        <div class="card">
+          <h4>Raw API</h4>
+          <p class="small muted">Open developer console (F12) to inspect requests; or use Demo Mode to run without backend.</p>
+          <button id="refreshBtn">Refresh Accounts</button>
+          <button id="logoutBtn">Logout</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="log" class="card" style="display:none">
+    <h4>Console</h4>
+    <pre id="logBox" style="height:160px;overflow:auto"></pre>
+  </div>
+</div>
+
+<script>
+/*
+ Demo-capable frontend.
+ - If "Use Demo Mode" is checked, the app runs entirely in localStorage (no backend).
+ - Otherwise it attempts to call the API_BASE (set and saved).
+*/
+
+const el = id => document.getElementById(id);
+const logLine = s => { el('log').style.display='block'; el('logBox').textContent += s + "\n"; el('logBox').scrollTop = el('logBox').scrollHeight; };
+
+// State
+let API_BASE = localStorage.getItem('API_BASE') || '';
+el('apiBaseInput').value = API_BASE;
+let demoMode = (localStorage.getItem('DEMO_MODE') === '1');
+el('demoMode').checked = demoMode;
+
+// Save API base
+el('saveApi').onclick = () => {
+  API_BASE = el('apiBaseInput').value.trim();
+  localStorage.setItem('API_BASE', API_BASE);
+  alert('Saved API base: ' + API_BASE + "\nRemember: Netlify cannot access localhost.");
+};
+
+// Demo mode toggle
+el('demoMode').onchange = () => {
+  demoMode = el('demoMode').checked;
+  localStorage.setItem('DEMO_MODE', demoMode ? '1' : '0');
+  alert('Demo Mode ' + (demoMode ? 'ON' : 'OFF') + '. Use Demo Mode if you do not have a backend URL.');
+};
+
+// Utility: fetch wrapper
+async function post(path, data) {
+  if (demoMode) return demoBackend.post(path, data);
+  const url = API_BASE + path;
+  try {
+    const params = new URLSearchParams(data);
+    const res = await fetch(url, { method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: params });
+    const text = await res.text();
+    try { return JSON.parse(text); } catch(e) { return { ok:false, raw: text }; }
+  } catch(err) {
+    logLine('Network error: ' + err.message);
+    return { ok:false, error:'network' };
+  }
+}
+
+async function getJson(path, params={}) {
+  if (demoMode) return demoBackend.get(path, params);
+  try {
+    const url = new URL(API_BASE + path);
+    Object.keys(params).forEach(k => url.searchParams.append(k, params[k]));
+    const res = await fetch(url, { method:'GET' });
+    return res.json();
+  } catch(err) {
+    logLine('Network error: ' + err.message);
+    return { ok:false, error:'network' };
+  }
+}
+
+// Demo backend implementation (keeps data in localStorage)
+const demoBackend = (function(){
+  const LS_KEY = 'DEMO_BANK_V1';
+  function load() { try { return JSON.parse(localStorage.getItem(LS_KEY) || '{}'); } catch(e){ return {}; } }
+  function save(state){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+  // initialize
+  let state = load();
+  if (!state.users) {
+    state = { users: {}, demoCounter: 1000 };
+    // add one demo user
+    state.users['alice'] = {
+      username:'alice', password:'alice123', name:'Alice Demo',
+      accounts: [
+        { accountNo:'ALI-1001', type:'SavingsAccount', balance:5000, transactions:[] }
+      ]
+    };
+    state.demoCounter = 1001;
+    save(state);
+  }
+
+  function genAccountNo(username) {
+    state.demoCounter++;
+    save(state);
+    const p = (username && username.length>=3) ? username.substring(0,3).toUpperCase() : username.toUpperCase();
+    return p + '-' + state.demoCounter;
+  }
+
+  return {
+    post: async (path, data) => {
+      state = load();
+      // register
+      if (path === '/register') {
+        const { username, password, name } = data;
+        if (!username || !password) return { ok:false, error:'missing' };
+        if (state.users[username]) return { ok:false, error:'exists' };
+        const accountNo = genAccountNo(username);
+        state.users[username] = { username, password, name:name||username, accounts: [ { accountNo, type:'SavingsAccount', balance:0, transactions:[] } ] };
+        save(state);
+        return { ok:true, msg:'registered', defaultAccount: accountNo };
+      }
+      // login
+      if (path === '/login') {
+        const { username, password } = data;
+        const u = state.users[username];
+        if (!u || u.password !== password) return { ok:false, error:'invalid' };
+        return { ok:true, token:username, name:u.name };
+      }
+      // savings deposit
+      if (path === '/savings/deposit') {
+        const { token, accountNo, amount } = data;
+        const u = state.users[token]; if (!u) return { ok:false };
+        const a = u.accounts.find(x=>x.accountNo===accountNo);
+        const amt = parseFloat(amount) || 0;
+        if (!a || a.type!=='SavingsAccount') return { ok:false };
+        a.balance = (a.balance || 0) + amt;
+        a.transactions = a.transactions || [];
+        a.transactions.push({ desc:'Deposit', amount:amt, ts:Date.now() });
+        save(state);
+        return { ok:true, balance: a.balance };
+      }
+      if (path === '/savings/withdraw') {
+        const { token, accountNo, amount } = data;
+        const u = state.users[token]; if (!u) return { ok:false };
+        const a = u.accounts.find(x=>x.accountNo===accountNo);
+        const amt = parseFloat(amount) || 0;
+        if (!a || a.type!=='SavingsAccount') return { ok:false };
+        if ((a.balance||0) < amt) return { ok:false, error:'insufficient', balance:a.balance };
+        a.balance -= amt;
+        a.transactions = a.transactions || [];
+        a.transactions.push({ desc:'Withdraw', amount:-amt, ts:Date.now() });
+        save(state);
+        return { ok:true, balance: a.balance };
+      }
+      if (path === '/fd/create') {
+        const { token, principal, months, rate } = data;
+        const u = state.users[token]; if (!u) return { ok:false };
+        const p = parseFloat(principal) || 0; const m = parseInt(months)||0; const r = parseFloat(rate)||0;
+        const accNo = genAccountNo(token);
+        const fd = { accountNo: accNo, type:'FDAccount', principal: p, months: m, rate: r };
+        u.accounts.push(fd);
+        save(state);
+        const mat = p + p*(r/100)*(m/12.0);
+        return { ok:true, accountNo: accNo, maturity: mat };
+      }
+      if (path === '/loan/apply') {
+        const { token, principal, rate, months } = data;
+        const u = state.users[token]; if (!u) return { ok:false };
+        const p = parseFloat(principal)||0; const r = parseFloat(rate)||0; const m = parseInt(months)||0;
+        const accNo = genAccountNo(token);
+        const loan = { accountNo: accNo, type:'LoanAccount', principal:p, outstanding:p, rate:r, months:m, transactions:[] };
+        u.accounts.push(loan);
+        save(state);
+        return { ok:true, accountNo:accNo, outstanding:loan.outstanding };
+      }
+      if (path === '/card/issue') {
+        const { token, type, linked, limit } = data;
+        const u = state.users[token]; if (!u) return { ok:false };
+        if (type === 'debit') {
+          const linkedAcc = u.accounts.find(x=>x.accountNo===linked && x.type==='SavingsAccount');
+          if (!linkedAcc) return { ok:false, error:'linked' };
+          const accNo = genAccountNo(token);
+          const dc = { accountNo:accNo, type:'DebitCard', linked:linkedAcc.accountNo };
+          u.accounts.push(dc); save(state);
+          return { ok:true, accountNo: accNo };
+        } else {
+          const lim = parseFloat(limit)||0;
+          const accNo = genAccountNo(token);
+          const cc = { accountNo:accNo, type:'CreditCard', limit:lim, outstanding:0, transactions:[] };
+          u.accounts.push(cc); save(state);
+          return { ok:true, accountNo:accNo };
+        }
+      }
+      if (path === '/card/charge') {
+        const { token, accountNo, amount } = data;
+        const u = state.users[token]; if (!u) return { ok:false };
+        const a = u.accounts.find(x=>x.accountNo===accountNo);
+        const amt = parseFloat(amount)||0;
+        if (!a) return { ok:false };
+        if (a.type === 'DebitCard') {
+          // find linked savings
+          const ls = u.accounts.find(x=>x.accountNo===a.linked && x.type==='SavingsAccount');
+          if (!ls) return { ok:false };
+          if ((ls.balance||0) < amt) return { ok:false, error:'insufficient' };
+          ls.balance -= amt; ls.transactions = ls.transactions || []; ls.transactions.push({desc:'Card withdraw', amount:-amt, ts:Date.now()});
+          save(state); return { ok:true };
+        } else if (a.type === 'CreditCard') {
+          if ((a.outstanding||0) + amt > (a.limit||0)) return { ok:false, error:'limit' };
+          a.outstanding = (a.outstanding||0) + amt; a.transactions = a.transactions || []; a.transactions.push({desc:'Charge', amount:amt, ts:Date.now()});
+          save(state); return { ok:true };
+        } else return { ok:false };
+      }
+      if (path === '/card/pay') {
+        const { token, accountNo, amount } = data;
+        const u = state.users[token]; if (!u) return { ok:false };
+        const a = u.accounts.find(x=>x.accountNo===accountNo);
+        const amt = parseFloat(amount)||0;
+        if (!a) return { ok:false };
+        if (a.type === 'CreditCard') {
+          const pay = Math.min(amt, a.outstanding||0);
+          a.outstanding = (a.outstanding||0) - pay; a.transactions = a.transactions || []; a.transactions.push({desc:'Payment', amount:-pay, ts:Date.now()});
+          save(state); return { ok:true };
+        } else if (a.type === 'DebitCard') {
+          // deposit to linked savings
+          const ls = u.accounts.find(x=>x.accountNo===a.linked && x.type==='SavingsAccount');
+          if (!ls) return { ok:false };
+          ls.balance = (ls.balance||0) + amt; ls.transactions = ls.transactions || []; ls.transactions.push({desc:'Card deposit', amount:amt, ts:Date.now()});
+          save(state); return { ok:true };
+        } else return { ok:false };
+      }
+      // fallback
+      return { ok:false, error:'unknown' };
+    },
+
+    get: async (path, params) => {
+      state = load();
+      if (path === '/accounts') {
+        const token = params.token;
+        const u = state.users[token]; if (!u) return { ok:false };
+        const accounts = u.accounts.map(a => {
+          // ensure minimal fields
+          return { accountNo: a.accountNo, type: a.type, balance: a.balance, principal: a.principal, outstanding: a.outstanding, limit: a.limit };
+        });
+        return { ok:true, accounts };
+      }
+      if (path === '/credit/mindue') {
+        const token = params.token, accountNo = params.accountNo;
+        const u = state.users[token]; if (!u) return { ok:false };
+        const a = u.accounts.find(x=>x.accountNo===accountNo && x.type==='CreditCard');
+        if (!a) return { ok:false };
+        const outstanding = a.outstanding||0;
+        const minDue = Math.max(10, outstanding*0.10);
+        return { ok:true, outstanding, minDue };
+      }
+      return { ok:false };
+    }
+  };
+})();
+
+// UI wiring (works with demoBackend or real backend)
+let token = null, usernameGlobal = null;
+
+el('btnRegister').onclick = async () => {
+  const u = el('username').value.trim(), p = el('password').value.trim(), name = el('fullname').value.trim() || u;
+  const r = await post('/register', { username: u, password: p, name: name });
+  el('authMsg').textContent = JSON.stringify(r);
+  logLine('REGISTER: ' + JSON.stringify(r));
+};
+
+el('btnLogin').onclick = async () => {
+  const u = el('username').value.trim(), p = el('password').value.trim();
+  const r = await post('/login', { username: u, password: p });
+  logLine('LOGIN: ' + JSON.stringify(r));
+  if (r.ok) {
+    token = r.token; usernameGlobal = r.name; el('userName').textContent = usernameGlobal;
+    el('authCard').style.display = 'none'; el('dashboard').style.display='block'; el('log').style.display='block';
+    await refreshAccounts();
+  } else {
+    el('authMsg').textContent = r.error || 'Login failed';
+  }
+};
+
+el('refreshBtn').onclick = refreshAccounts;
+
+async function refreshAccounts() {
+  if (!token) return;
+  const j = await getJson('/accounts', { token: token });
+  logLine('ACCOUNTS: ' + JSON.stringify(j));
+  if (!j.ok) { el('accountsList').textContent = 'Error fetching accounts'; return; }
+  const list = j.accounts || [];
+  el('accountsList').innerHTML = list.map(a => `${a.accountNo} (${a.type}${a.balance? ' - ' + a.balance: (a.principal? ' - principal ' + a.principal : '')})`).join('<br>');
+  // populate savings select
+  const savings = list.filter(a=>a.type==='SavingsAccount');
+  const sel = el('savingsSelect'); sel.innerHTML='';
+  savings.forEach(s=>{ let o=document.createElement('option'); o.value=s.accountNo; o.textContent=s.accountNo + ' — ' + (s.balance||0); sel.appendChild(o); });
+}
+
+el('depositBtn').onclick = async () => {
+  const acc = el('savingsSelect').value, amt = el('savingsAmount').value;
+  const r = await post('/savings/deposit', { token: token, accountNo: acc, amount: amt });
+  el('savingsMsg').textContent = JSON.stringify(r);
+  logLine('DEPOSIT: ' + JSON.stringify(r));
+  await refreshAccounts();
+};
+
+el('withdrawBtn').onclick = async () => {
+  const acc = el('savingsSelect').value, amt = el('savingsAmount').value;
+  const r = await post('/savings/withdraw', { token: token, accountNo: acc, amount: amt });
+  el('savingsMsg').textContent = JSON.stringify(r);
+  logLine('WITHDRAW: ' + JSON.stringify(r));
+  await refreshAccounts();
+};
+
+el('openFdBtn').onclick = async () => {
+  const principal = el('fdPrincipal').value, months = el('fdMonths').value, rate = el('fdRate').value;
+  const r = await post('/fd/create', { token: token, principal: principal, months: months, rate: rate });
+  el('fdMsg').textContent = JSON.stringify(r);
+  logLine('FD CREATE: ' + JSON.stringify(r));
+  await refreshAccounts();
+};
+
+el('applyLoanBtn').onclick = async () => {
+  const p = el('loanPrincipal').value, rate = el('loanRate').value, months = el('loanMonths').value;
+  const r = await post('/loan/apply', { token: token, principal: p, rate: rate, months: months });
+  el('loanMsg').textContent = JSON.stringify(r);
+  logLine('LOAN APPLY: ' + JSON.stringify(r));
+  await refreshAccounts();
+};
+
+el('issueCardBtn').onclick = async () => {
+  const type = el('cardType').value, param = el('cardParam').value.trim();
+  const data = { token: token, type: type };
+  if (type==='debit') data.linked = param; else data.limit = param;
+  const r = await post('/card/issue', data);
+  el('cardMsg').textContent = JSON.stringify(r);
+  logLine('CARD ISSUE: ' + JSON.stringify(r));
+  await refreshAccounts();
+};
+
+el('cardChargeBtn').onclick = async () => {
+  const acc = el('cardAccountNo').value.trim(), amt = el('cardAmount').value;
+  const r = await post('/card/charge', { token: token, accountNo: acc, amount: amt });
+  el('cardActionMsg').textContent = JSON.stringify(r);
+  logLine('CARD CHARGE: ' + JSON.stringify(r));
+  await refreshAccounts();
+};
+
+el('cardPayBtn').onclick = async () => {
+  const acc = el('cardAccountNo').value.trim(), amt = el('cardAmount').value;
+  const r = await post('/card/pay', { token: token, accountNo: acc, amount: amt });
+  el('cardActionMsg').textContent = JSON.stringify(r);
+  logLine('CARD PAY: ' + JSON.stringify(r));
+  await refreshAccounts();
+};
+
+el('cardMinDueBtn').onclick = async () => {
+  const acc = el('cardAccountNo').value.trim();
+  const r = await getJson('/credit/mindue', { token: token, accountNo: acc });
+  el('cardInfo').textContent = JSON.stringify(r);
+  logLine('CARD MIN DUE: ' + JSON.stringify(r));
+};
+
+el('logoutBtn').onclick = () => { token=null; usernameGlobal=null; el('dashboard').style.display='none'; el('authCard').style.display='block'; el('log').style.display='none'; el('authMsg').textContent='Logged out'; };
+
+// initialize UI
+window.addEventListener('load', () => {
+  if (localStorage.getItem('API_BASE')) el('apiBaseInput').value = localStorage.getItem('API_BASE');
+  el('demoMode').checked = demoMode;
+});
+</script>
+</body>
+</html>
